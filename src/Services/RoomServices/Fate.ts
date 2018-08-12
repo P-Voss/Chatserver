@@ -12,10 +12,18 @@ import {Room} from '../../Models/Room';
 import {Client} from '../../Models/Client';
 
 import RoomServiceInterface from '../RoomServiceInterface'
+import RoomRepositoryInterface from "../../Repositories/RoomRepositoryInterface";
+import UserRepositoryInterface from "../../Repositories/UserRepositoryInterface";
 
 export class RoomService implements RoomServiceInterface{
 
     private rooms: Map<number, Room> = new Map();
+    private roomRepository: RoomRepositoryInterface;
+
+    constructor(roomRepository: RoomRepositoryInterface) {
+        this.roomRepository = roomRepository;
+        this.roomRepository.getPublicRooms();
+    }
 
     createRoom(roomId: number, client: Client) {
         let room = new Room(roomId, client.username);
@@ -28,6 +36,8 @@ export class RoomService implements RoomServiceInterface{
     }
 
     /**
+     * Push-Nachricht mit aktuellen Status der Chatrooms für die Admins vorbereiten
+     *
      * Maps können nicht per WebSocket JSON encodet werden, deshalb wird der zu übertragende Inhalt in ein neues Array geschrieben.
      * WS wird aus dem Einträgen von Participants nicht übernommen weil die WebSocket-Informationen nicht übertragen werden sollen
      */

@@ -7,16 +7,15 @@
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
  */
-import {RoomService as Support} from './Support';
-import {RoomService as Fate} from './Fate';
-import RoomRepositoryInterface from "../../Repositories/RoomRepositoryInterface";
+import {ConnectionHandler as Support} from './Support';
+import {ConnectionHandler as Fate} from './Fate';
 
-export default (chatModule = 'default', roomRepository: RoomRepositoryInterface) => {
+export default (chatModule = 'default') => {
     switch (chatModule) {
         case 'Support':
             return new Support();
         case 'Fate':
-            return new Fate(roomRepository);
+            return new Fate();
     }
     throw new Error("Missing implementation for RoomService: " + chatModule);
 }

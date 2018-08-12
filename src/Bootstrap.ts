@@ -1,19 +1,35 @@
+/*
+ * ISC License
+ *
+ * Copyright (c) 2018 Philipp Voß
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ */
+
 import {createPool, Pool} from "mysql2";
 import {Server} from 'ws';
-import {createLogger, transports, Logger } from 'winston';
+import {createLogger, transports, Logger} from 'winston';
 
 import {createServer} from 'https';
+
 const express = require('express');
 const fs = require('fs');
 
-import UserRepoFactory from './src/Repositories/UserRepositories/Factory';
-import ClientServiceFactory from './src/Services/ClientServices/Factory';
-import RoomServiceFactory from './src/Services/RoomServices/Factory';
+import UserRepoFactory from './Repositories/UserRepositories/Factory';
+import RoomRepoFactory from './Repositories/RoomRepositories/Factory';
+import ClientServiceFactory from './Services/ClientServices/Factory';
+import RoomServiceFactory from './Services/RoomServices/Factory';
+import ConnectionHandlerFactory from './Services/ConnectionHandlers/Factory';
 
-import ClientServiceInterface from "./src/Services/ClientServiceInterface";
-import RoomServiceInterface from "./src/Services/RoomServiceInterface";
+import ClientServiceInterface from "./Services/ClientServiceInterface";
+import RoomServiceInterface from "./Services/RoomServiceInterface";
+import ConnectionHandlerInterface from "./Services/ConnectionHandlerInterface";
 
-const config = require('./src/config/config');
+import MessageService from "./Services/MessageService";
+
+const config = require('./config/config');
 
 function initWss(): Server {
     if (config.serverConfig.ssl) {
@@ -56,25 +72,41 @@ class Bootstrap {
         }
         return this.db;
     }
+
     getWss(): Server {
         if (this.wss === undefined) {
             this.wss = initWss();
         }
         return this.wss;
     }
+
     getLogger(): Logger {
         if (this.logger === undefined) {
             this.logger = initLogger();
         }
         return this.logger;
     }
+
     getClientService(): ClientServiceInterface {
         const userRepo = UserRepoFactory(config.chatModule, this.getDb());
         return ClientServiceFactory(config.chatModule, userRepo);
     }
-    getRoomService(): RoomServiceInterface {
-        return RoomServiceFactory(config.chatModule);
-    }
-};
 
-export default new Bootstrap();
+    getRoomService(): RoomServiceInterface {
+        const roomRepo = RoomRepoFactory(config.chatModule, this.getDb());
+        return RoomServiceFactory(config.chatModule, roomRepo);
+    }
+    getMessageService(): MessageService {
+        return new MessageService(
+            this.getClientService(),
+            this.getRoomService()
+        );
+    }
+    getConnectionHandler(): ConnectionHandlerInterface {
+        return ConnectionHandlerFactory(config.chatModule);
+    }
+}
+
+const bootstrap = new Bootstrap();
+
+export default bootstrap;

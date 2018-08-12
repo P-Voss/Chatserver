@@ -8,9 +8,9 @@
  * copyright notice and this permission notice appear in all copies.
  */
 import {Pool} from 'mysql2';
-import {UserRepository as Support} from './Support';
-import {UserRepository as Fate} from './Fate';
-import UserRepositoryInterface from "../UserRepositoryInterface";
+import {RoomRepository as Support} from './Support';
+import {RoomRepository as Fate} from './Fate';
+import UserRepositoryInterface from "../RoomRepositoryInterface";
 
 export default (chatModule = 'default', pool: Pool): UserRepositoryInterface => {
     switch (chatModule) {

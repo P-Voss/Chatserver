@@ -8,10 +8,13 @@
  * copyright notice and this permission notice appear in all copies.
  */
 import {ClientService as Support} from './Support';
+import {ClientService as Fate} from './Fate';
 import UserRepositoryInterface from "../../Repositories/UserRepositoryInterface";
 
 export default (chatModule = 'default', UserRepository: UserRepositoryInterface) => {
     switch (chatModule) {
+        case 'Fate':
+            return new Fate(UserRepository);
         case 'Support':
             return new Support(UserRepository);
     }
